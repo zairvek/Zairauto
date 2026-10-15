@@ -1,0 +1,21 @@
+.externalNativeBuild/
+.gradle/
+.idea/
+.settings/
+.project
+.classpath
+build/
+dist/
+.cxx/
+*.iml
+local.properties
+google-services.json
+TODO
+res/*.jks
+
+# Custom builds
+fermata/src/custom/
+build-custom.gradle
+
+# Zair Auto modification, 2026-10-14: private CI signing material
+ci-signing.jks

@@ -1,0 +1,2 @@
+<!-- Zair Auto modification, 2026-10-14. GPL-3.0; upstream credits retained. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"><item android:drawable="@drawable/zair_icon_bg" /><item android:drawable="@drawable/zair_mark" /></layer-list>

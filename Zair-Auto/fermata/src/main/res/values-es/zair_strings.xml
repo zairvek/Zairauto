@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <string name="zair_home">Inicio</string>
+  <string name="zair_tagline">TU CONTENIDO. A TU MANERA.</string>
+  <string name="zair_intro">Música, video y TV en un solo lugar.</string>
+  <string name="zair_now">CONTINUAR REPRODUCIENDO</string>
+  <string name="zair_empty">Todo listo para comenzar</string>
+  <string name="zair_empty_hint">Agrega tu primera carpeta o abre un enlace multimedia.</string>
+  <string name="zair_open_library">Explorar biblioteca</string>
+  <string name="zair_collection">Tu colección</string>
+  <string name="zair_library">Biblioteca</string>
+  <string name="zair_quick_actions">Accesos rápidos</string>
+  <string name="zair_folder_hint">Elige dónde guardas tu música y videos</string>
+  <string name="zair_open_link">Abrir enlace multimedia</string>
+  <string name="zair_link_hint">Reproduce una URL directa de audio, video o radio</string>
+  <string name="zair_explore">Explorar</string>
+  <string name="zair_module_hint">Abrir esta sección multimedia</string>
+  <string name="zair_sound">Sonido y ecualizador</string>
+  <string name="zair_sound_hint">Ajusta los efectos de reproducción</string>
+  <string name="zair_settings_hint">Apariencia, reproducción y preferencias</string>
+  <string name="zair_compatibility">Compatibilidad con Android Auto</string>
+  <string name="zair_compatibility_hint">Consultar requisitos y limitaciones</string>
+  <string name="zair_credit">Versión independiente GPL-3.0 basada en Fermata de Andrey Pavlenko. Cambios Zair Auto: 14 de octubre de 2026.</string>
+  <string name="zair_buffering">Cargando contenido…</string>
+  <string name="zair_play_error">No se pudo reproducir. Revisa la fuente o elige otro motor de reproducción.</string>
+  <string name="zair_playing">Reproduciendo ahora</string>
+  <string name="zair_resume_hint">Tu último archivo, listo para continuar</string>
+  <string name="zair_pause">Pausar reproducción</string>
+  <string name="zair_resume">Continuar reproducción</string>
+  <string name="zair_link_message">Pega una URL directa de contenido multimedia. Para YouTube, usa la sección de YouTube.</string>
+  <string name="zair_play">Reproducir</string>
+  <string name="zair_invalid_link">Escribe una URL válida que empiece con http:// o https://.</string>
+  <string name="zair_compatibility_message">Android %1$s · API %2$d\n\nEl audio utiliza el servicio multimedia de Fermata. Que la app aparezca en Android Auto depende del teléfono, la instalación y la pantalla del vehículo. Cambiar la interfaz no garantiza video ni visibilidad en Android Auto.\n\nLa reproducción en el teléfono y Android TV funciona de forma independiente de la proyección al carro. El video en el vehículo es para uso estacionado.</string>
+  <string name="zair_back">Atrás</string>
+  <string name="zair_change_view">Portadas / lista</string>
+  <string name="zair_sort">Ordenar</string>
+  <string name="zair_more">Más opciones</string>
+  <string name="zair_search">Buscar en la biblioteca</string>
+  <string name="zair_shelf_hint">Desliza para elegir · Toca para abrir</string>
+  <string name="zair_no_items">Todavía no hay elementos</string>
+  <string name="zair_empty_library_hint">Abre el menú para agregar tu contenido</string>
+  <string name="zair_share_report">Compartir informe del fallo</string>
+  <string name="zair_auto_modes">Zair Auto · Audio es el navegador de audio de Android Auto: su pantalla la dibuja Android Auto y no muestra YouTube ni este carrusel. La interfaz completa de proyección de Fermata tiene carrusel y YouTube cuando su módulo está activado, pero el acceso depende de tu instalación de Android Auto. Cambiar el nombre o el diseño no desbloquea la proyección. El video en el vehículo es para uso estacionado.</string>
+</resources>

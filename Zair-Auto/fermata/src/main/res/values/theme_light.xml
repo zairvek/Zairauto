@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Zair Auto modification, 2026-10-14. GPL-3.0; upstream credits retained. -->
+<resources>
+
+    <style name="AppTheme.Light">
+        <item name="android:isLightTheme">true</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+
+        <item name="android:colorBackground">#F4F7FA</item>
+
+        <!-- Status bar-->
+        <item name="colorPrimaryDark">#E4EDF3</item>
+
+        <!-- Tool/Nav bars -->
+        <item name="colorPrimary">?colorPrimaryDark</item>
+        <item name="colorOnPrimary">#12685C</item>
+        <item name="android:textColorPrimary">#102638</item>
+
+        <!-- List/Media items -->
+        <item name="colorSecondary">#FFFFFF</item>
+        <item name="colorOnSecondary">?colorOnPrimary</item>
+        <item name="android:textColorSecondary">#183041</item>
+        <item name="boxStrokeColor">#E4EDF3</item>
+
+        <!-- Active media item -->
+        <item name="alpha">1</item>
+        <item name="colorSecondaryVariant">#12685C</item>
+        <item name="android:textColorTertiary">#F4F7FA</item>
+
+        <!-- Popup menu -->
+        <item name="colorSurface">?colorPrimary</item>
+        <item name="colorOnSurface">?colorOnPrimary</item>
+        <item name="colorPrimarySurface">?colorOnPrimary</item>
+        <item name="colorOnPrimarySurface">?colorOnPrimary</item>
+        <item name="popupMenuStyle">@style/AppTheme.Light.PopupMenuStyle</item>
+
+        <item name="colorAccent">?colorSecondaryVariant</item>
+        <item name="rippleColor">?colorAccent</item>
+
+        <item name="android:textColorHint">#556A79</item>
+
+        <item name="colorControlNormal">#262A33</item>
+        <item name="colorControlActivated">?colorOnPrimary</item>
+
+    </style>
+
+    <style name="AppTheme.Light.PopupMenuStyle" parent="Theme.Utils.Base.PopupMenuStyle">
+        <item name="android:textColor">?colorOnPrimary</item>
+    </style>
+
+</resources>
