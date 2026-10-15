@@ -29,7 +29,7 @@ reescrito desde cero en Kotlin con **Jetpack Compose (Material 3)** y **Media3 /
 
 ## Instalación
 
-1. Descarga el APK desde la pestaña **Actions** del repositorio (artefacto `zairauto-apk`) o compílalo:
+1. Descarga **[Zairauto.apk](../../releases/latest/download/Zairauto.apk)** (también en la sección **Releases** del repositorio) o compílalo:
    ```bash
    ./gradlew assembleRelease   # app/build/outputs/apk/release/app-release.apk
    ```
