@@ -1,6 +1,12 @@
-# Validación de Zair Auto 0.2.2
+# Validación de Zair Auto 0.2.3
 
-Fecha: 15 de octubre de 2026. Versión 0.2.2-zair, código 4.
+Fecha: 15 de octubre de 2026. Versión 0.2.3-zair, código 5.
+
+- Reproducido en emulador Android 11 x86_64 (APK x86_64 de la misma fuente): al abrir Configuración
+  la app se cerraba con `RuntimeException: Addon not found: whisper`. Tras la corrección abren sin cierre
+  Configuración, sus 10 secciones y todas las opciones del menú lateral (Inicio, Biblioteca, Favoritos,
+  Listas, TV, YouTube, Navegador, Agregar carpeta, Abrir enlace, Sonido, Compartir informe).
+- No probado aún en teléfono real ARM64 ni en Android Auto.
 
 - `fermata:packageAutoReleaseUniversalApk -PZAIR_CORE=true -PABI=arm64-v8a`: compilación correcta,
   con R8 y `lintVitalAutoRelease` aprobados.
@@ -8,8 +14,7 @@ Fecha: 15 de octubre de 2026. Versión 0.2.2-zair, código 4.
   español/inglés de Zair coincidentes.
 - Traducciones al español comprobadas contra el inglés: mismos nombres, mismos marcadores de formato
   (`%1$s`, `%d`…) y XML válido en los 8 archivos.
-- No se probó en teléfono, emulador ni vehículo (el entorno no tiene virtualización). El APK compilado
-  aquí está firmado con una clave de prueba distinta de la de 0.2.1.
+- El APK compilado aquí está firmado con una clave de prueba distinta de la de 0.2.1.
 
 ---
 

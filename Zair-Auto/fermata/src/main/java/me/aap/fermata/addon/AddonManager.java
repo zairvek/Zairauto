@@ -73,7 +73,13 @@ public class AddonManager extends BasicEventBroadcaster<AddonManager.Listener>
 	public synchronized FutureSupplier<FermataAddon> getOrInstallAddon(String moduleOrClassName) {
 		var a = getAddon(moduleOrClassName);
 		if (a != null) return completed(a);
-		var info = FermataAddon.findAddonInfo(moduleOrClassName);
+		AddonInfo info;
+		try {
+			info = FermataAddon.findAddonInfo(moduleOrClassName);
+		} catch (RuntimeException ex) {
+			// Zair Auto: the module is not part of this build (e.g. Whisper in ZAIR_CORE).
+			return failed(ex);
+		}
 		var prefs = FermataApplication.get().getPreferenceStore();
 		if (!prefs.getBooleanPref(info.enabledPref)) prefs.applyBooleanPref(info.enabledPref, true);
 		install(info);

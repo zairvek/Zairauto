@@ -274,7 +274,8 @@ public class SettingsFragment extends MainActivityFragment
 	public static void addAutoSubPrefs(Context ctx, PreferenceSet set, PreferenceStore ps,
 																		 ChangeableCondition cond, boolean isGlobalSettings) {
 		var subGen = FermataApplication.get().getAddonManager().getAddon(SubGenAddon.class);
-		if (subGen == null) return;
+		// Zair Auto: opening Settings crashed with "Addon not found: whisper" in ZAIR_CORE builds.
+		if ((subGen == null) || !SubGenAddon.isImplAvailable()) return;
 
 		var subGenSet = set.subSet(o -> {
 			o.title = R.string.subtitles_auto;

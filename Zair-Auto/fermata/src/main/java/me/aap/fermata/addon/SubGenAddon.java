@@ -145,13 +145,14 @@ public class SubGenAddon implements FermataAddon {
 
 	@Override
 	public void install() {
-		if (getClass() != SubGenAddon.class) return;
+		if ((getClass() != SubGenAddon.class) || !isImplAvailable()) return;
 		var ps = FermataApplication.get().getPreferenceStore();
 		ps.applyBooleanPref(getImplInfo().enabledPref, true);
 	}
 
 	@Override
 	public void uninstall() {
+		if (!isImplAvailable()) return;
 		FermataApplication.get().getPreferenceStore()
 				.applyBooleanPref(getImplInfo().enabledPref, false);
 	}
@@ -209,6 +210,18 @@ public class SubGenAddon implements FermataAddon {
 	protected List<Pair<String, String>> getSupportedLanguages() {
 		return Collections.singletonList(
 				new Pair<>("auto", FermataApplication.get().getString(R.string.auto)));
+	}
+
+	/**
+	 * Zair Auto: the speech-to-text engine (Whisper) is an optional module that the compact
+	 * ZAIR_CORE build omits. Without it the automatic subtitle settings must not be shown.
+	 */
+	public static boolean isImplAvailable() {
+		var impl = FermataApplication.get().getPreferenceStore().getStringPref(IMPL);
+		for (AddonInfo ai : me.aap.fermata.BuildConfig.ADDONS) {
+			if (impl.equals(ai.moduleName) || impl.equals(ai.className)) return true;
+		}
+		return false;
 	}
 
 	private AddonInfo getImplInfo() {

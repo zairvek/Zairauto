@@ -1,8 +1,8 @@
 # Zair Auto modification, 2026-10-14. GPL-3.0; upstream credits retained.
 [versions]
 # App
-appVersionCode = "4"
-appVersionName = "0.2.2-zair"
+appVersionCode = "5"
+appVersionName = "0.2.3-zair"
 
 # Build tooling
 agp = "9.4.1"

@@ -1,11 +1,11 @@
-# Zair Auto 0.2.2 — versión de prueba
+# Zair Auto 0.2.3 — versión de prueba
 
 Aplicación Android nativa basada en **Fermata Media Player**, de Andrey Pavlenko.
 Este es un fork independiente: no es una versión oficial ni está afiliado al autor.
 
 ## Instalar
 
-1. Instala `Zair-Auto-0.2.2-arm64.apk` en tu teléfono Android 9 o superior.
+1. Instala `Zair-Auto-0.2.3-arm64.apk` en tu teléfono Android 9 o superior.
 2. Permite instalar desde la aplicación con la que abriste el APK, si Android lo pide.
 3. Abre **Zair Auto**, pulsa **Agregar carpeta** y selecciona una carpeta con música o video.
 4. Para TV/IPTV utiliza el módulo TV con tus propias listas. No incluye suscripciones ni canales.
@@ -13,6 +13,15 @@ Este es un fork independiente: no es una versión oficial ni está afiliado al a
 
 Se instala junto a Fermata, con datos propios. No importa automáticamente su configuración.
 El APK ARM64 sirve para teléfonos Android modernos de 64 bits. No incluye x86 ni ARM de 32 bits.
+
+## Corrección 0.2.3
+
+- **Configuración cerraba la app** («Addon not found: whisper»). La edición compacta
+  (`ZAIR_CORE`) no incluye el motor de voz Whisper, pero Configuración intentaba cargarlo
+  para «Subtítulos automáticos». Ahora esa sección solo aparece si el motor está incluido,
+  y un módulo ausente nunca cierra la app (tampoco en los ajustes de cada carpeta o video).
+- Comprobado en un emulador Android 11: Configuración y sus 10 secciones, y todas las
+  opciones del menú lateral, abren sin cerrarse.
 
 ## Correcciones y mejoras 0.2.2
 
@@ -69,7 +78,7 @@ Si se repite, vuelve a abrir la app y usa **Menú → Compartir informe del fall
 
 El APK conserva el identificador y la clave privada de la primera entrega, con un código
 de versión mayor. Puede instalarse como actualización de Zair Auto 0.1.0 y 0.2.0.
-0.2.2 usa el código de versión 4: para instalarlo como actualización tiene que firmarse con
+0.2.3 usa el código de versión 5: para instalarlo como actualización tiene que firmarse con
 esa misma clave (ver «Compilar el código»).
 No incluye las portadas de videojuegos de la referencia ni archivos multimedia de muestra.
 

@@ -62,3 +62,10 @@ Se conserva la navegación de Android Auto del código base y su restricción de
 - `values-es/strings.xml` (reescrito), `values-es/voice_cmd.xml` y `values-es` de los módulos web, tv, felex, chat, poi y utils.
 - Versión 0.2.2-zair, código 4.
 - `.github/workflows/zair-auto.yml` en la raíz del repositorio: compila y publica el APK.
+
+## Versión 0.2.3 — Configuración ya no cierra la app (15 de octubre de 2026)
+
+- `AddonManager.getOrInstallAddon`: devuelve un fallo en lugar de lanzar excepción si el módulo no está en la compilación.
+- `SubGenAddon.isImplAvailable`, `install`, `uninstall`: comprueban que el motor (Whisper) exista.
+- `SettingsFragment.addAutoSubPrefs`: oculta «Subtítulos automáticos» sin motor. Causa del cierre al abrir Configuración en ZAIR_CORE.
+- Versión 0.2.3-zair, código 5.
