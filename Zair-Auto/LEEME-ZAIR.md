@@ -1,11 +1,11 @@
-# Zair Auto 0.2.1 — versión de prueba
+# Zair Auto 0.2.2 — versión de prueba
 
 Aplicación Android nativa basada en **Fermata Media Player**, de Andrey Pavlenko.
 Este es un fork independiente: no es una versión oficial ni está afiliado al autor.
 
 ## Instalar
 
-1. Instala `Zair-Auto-0.2.1-arm64.apk` en tu teléfono Android 9 o superior.
+1. Instala `Zair-Auto-0.2.2-arm64.apk` en tu teléfono Android 9 o superior.
 2. Permite instalar desde la aplicación con la que abriste el APK, si Android lo pide.
 3. Abre **Zair Auto**, pulsa **Agregar carpeta** y selecciona una carpeta con música o video.
 4. Para TV/IPTV utiliza el módulo TV con tus propias listas. No incluye suscripciones ni canales.
@@ -13,6 +13,29 @@ Este es un fork independiente: no es una versión oficial ni está afiliado al a
 
 Se instala junto a Fermata, con datos propios. No importa automáticamente su configuración.
 El APK ARM64 sirve para teléfonos Android modernos de 64 bits. No incluye x86 ni ARM de 32 bits.
+
+## Correcciones y mejoras 0.2.2
+
+- **Compartir informe del fallo** ya no puede cerrar la app en la variante `mobile`
+  (no tiene FileProvider): el informe se comparte como texto. También avisa si no hay
+  ninguna app para compartir en lugar de fallar.
+- **Biblioteca vacía**: tocar la pantalla vacía de Carpetas vuelve a abrir «Agregar carpeta»
+  (antes el toque nunca llegaba porque RecyclerView no llama a `performClick`).
+- El mensaje «Todavía no hay elementos» ya no aparece mientras una carpeta se está cargando,
+  muestra «Sin resultados» al buscar y la pista de agregar carpeta solo en la raíz de Carpetas.
+- **Portadas**: el elemento enfocado (cruceta / mando giratorio del coche) y el que suena
+  ahora se resaltan; antes el fondo transparente los ocultaba.
+- Al volver de portadas a lista se restauran fondo, desplazamiento y elevación de la lista.
+- **Atrás** sale primero del video a pantalla completa aunque se haya abierto desde Inicio.
+- **Abrir enlace multimedia** acepta enlaces copiados con espacios.
+- Inicio muestra el título de lo que suena y ya no se recarga dos veces al abrirse.
+- Menos trabajo al desplazar portadas: no se crean dibujables ni pinceles en cada fotograma.
+- **Español completo**: se rehízo la traducción de la app (la anterior era parcial y automática,
+  con errores como «Juega a continuación al finalizar») y se tradujeron los módulos
+  TV, Web/YouTube, Felex, Chat, POI y utilidades. Nuevos comandos de voz en español
+  («pon …», «busca en youtube …», «adelanta 30 segundos», «pausa»…).
+
+Ninguna opción se ha quitado.
 
 ## Correcciones 0.2.1
 
@@ -46,6 +69,8 @@ Si se repite, vuelve a abrir la app y usa **Menú → Compartir informe del fall
 
 El APK conserva el identificador y la clave privada de la primera entrega, con un código
 de versión mayor. Puede instalarse como actualización de Zair Auto 0.1.0 y 0.2.0.
+0.2.2 usa el código de versión 4: para instalarlo como actualización tiene que firmarse con
+esa misma clave (ver «Compilar el código»).
 No incluye las portadas de videojuegos de la referencia ni archivos multimedia de muestra.
 
 Se conservan los motores MediaPlayer, ExoPlayer y VLC, IPTV, YouTube/navegador,
@@ -104,6 +129,14 @@ mayor. Conserva tu keystore de forma privada. Las claves y rutas de este entorno
 de compilación no se incluyen en el código fuente distribuido. El respaldo
 privado de la firma entregada va por separado en `Zair-Auto-Respaldo-de-firma.zip`.
 Consérvalo para poder instalar futuras versiones sobre esta APK.
+
+### Compilación automática en GitHub
+
+El flujo `.github/workflows/zair-auto.yml` de la raíz del repositorio compila el APK en cada
+cambio de `Zair-Auto/` y lo publica como `Zair-Auto.apk` en la versión `zair-auto` de Releases.
+Para que se instale como actualización de tu APK, añade en *Settings → Secrets → Actions*
+`CI_KEYSTORE` (tu keystore en base64), `CI_ALIAS`, `CI_KEY_PWD` y `CI_KEYSTORE_PWD`.
+Sin esos secretos el APK se firma con una clave nueva y Android pedirá desinstalar la versión anterior.
 
 ## Comprobaciones
 

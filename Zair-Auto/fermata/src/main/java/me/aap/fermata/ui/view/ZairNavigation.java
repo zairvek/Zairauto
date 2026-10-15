@@ -157,7 +157,8 @@ public final class ZairNavigation {
                 .setView(input).setNegativeButton(android.R.string.cancel,null).setPositiveButton(R.string.zair_play,null).create();
         own(a,dialog);
         dialog.setOnShowListener(d->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
-            String value=input.getText().toString().trim();
+            // Links copied from a browser or file manager often contain plain spaces.
+            String value=input.getText().toString().trim().replace(" ","%20");
             if(!ZairPlaybackGuard.isMediaUrl(value)){input.setError(c.getString(R.string.zair_invalid_link));return;}
             try {
                 if(a.showFragment(R.id.folders_fragment)==null)return;

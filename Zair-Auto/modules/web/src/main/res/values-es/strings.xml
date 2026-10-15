@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Zair Auto: traducción al español, 2026-10-15. GPL-3.0. -->
+<resources>
+    <string name="force_dark">Forzar modo oscuro, si es compatible</string>
+    <string name="force_dark_sub">%1$s. Elige \"Automático\" para seguir el tema del dispositivo.</string>
+    <string name="force_dark_auto">Automático</string>
+    <string name="force_dark_enabled">Activado</string>
+    <string name="force_dark_disabled">Desactivado</string>
+    <string name="user_agent">User-Agent</string>
+    <string name="user_agent_desktop">User-Agent - Versión de escritorio</string>
+    <string name="desktop_version">Versión de escritorio</string>
+    <string name="full_screen">Pantalla completa</string>
+    <string name="full_screen_exit">Salir de pantalla completa</string>
+    <string name="video_scaling_fill_proportional">Llenar proporcionalmente</string>
+    <string name="video_quality">Calidad de video</string>
+    <string name="open_on_start">Abrir al iniciar</string>
+    <string name="auto_highest_video_quality">Elegir automáticamente la mejor calidad de video</string>
+    <string name="try_to_skip_ad">Intentar omitir anuncios</string>
+    <string name="sponsorblock_sub">Omite segmentos marcados por la comunidad al ver YouTube.</string>
+    <string name="sponsorblock_enable">Activar SponsorBlock</string>
+    <string name="sponsorblock_enable_sub">Obtiene los datos de segmentos del video actual desde sponsor.ajay.app.</string>
+    <string name="sponsorblock_cat_sponsor">Segmentos patrocinados</string>
+    <string name="sponsorblock_cat_selfpromo">Autopromoción</string>
+    <string name="sponsorblock_cat_interaction">Recordatorios de interacción</string>
+    <string name="sponsorblock_cat_intro">Introducciones e intermedios</string>
+    <string name="sponsorblock_cat_outro">Pantallas finales y créditos</string>
+    <string name="sponsorblock_cat_preview">Avances y resúmenes</string>
+    <string name="sponsorblock_cat_hook">Ganchos</string>
+    <string name="sponsorblock_cat_music_offtopic">Secciones sin música</string>
+    <string name="sponsorblock_cat_filler">Relleno</string>
+    <string name="sponsorblock_cat_filler_sub">Categoría agresiva; desactivada de forma predeterminada.</string>
+</resources>

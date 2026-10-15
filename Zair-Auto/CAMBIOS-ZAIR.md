@@ -47,3 +47,18 @@ Se conserva la navegación de Android Auto del código base y su restricción de
 - El manejador de excepciones del delegado ya no reemplaza el del sistema; se elimina el correo de informes del autor original en este fork. El cierre exacto comunicado por el usuario sigue sin reproducirse.
 - `fermata/build.gradle`: servicio genérico etiquetado Zair Auto · Audio.
 - Versión 0.2.1-zair, código 3, certificado de firma conservado.
+
+## Versión 0.2.2 — correcciones y español completo (15 de octubre de 2026)
+
+- `ZairDiagnostics`: compartir el informe sin FileProvider (variante mobile) y sin app de destino ya no lanza excepción.
+- `MediaItemListView`, `MediaItemListViewAdapter`: estado de carga; toque en la biblioteca vacía (onTouchEvent);
+  mensaje vacío contextual («Sin resultados», pista solo en la raíz de Carpetas); pinceles reutilizados;
+  restauración de fondo, desplazamiento y barras al volver a la vista de lista.
+- `MediaItemView`, `drawable/zair_cover_bg.xml`: resaltado de foco y del elemento actual en portadas,
+  marco reutilizado, elevación de lista restaurada.
+- `MainActivityDelegate`: Atrás sale del video a pantalla completa desde cualquier sección.
+- `ZairHomeFragment`: título de lo que suena, sin recarga doble, escucha de sesión protegida.
+- `ZairNavigation`: los espacios de los enlaces pegados se codifican.
+- `values-es/strings.xml` (reescrito), `values-es/voice_cmd.xml` y `values-es` de los módulos web, tv, felex, chat, poi y utils.
+- Versión 0.2.2-zair, código 4.
+- `.github/workflows/zair-auto.yml` en la raíz del repositorio: compila y publica el APK.

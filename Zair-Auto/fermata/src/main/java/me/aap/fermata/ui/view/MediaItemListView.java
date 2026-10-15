@@ -43,11 +43,28 @@ public class MediaItemListView extends RecyclerView implements PreferenceStore.L
 		coverFlow = new ZairCoverFlow(this);
 		configure(ctx.getResources().getConfiguration());
 		setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
-        setOnClickListener(v->{
-            if(super.getAdapter()!=null&&super.getAdapter().getItemCount()==0 &&
-                getActivity().getActiveFragment() instanceof me.aap.fermata.ui.fragment.FoldersFragment f && f.isRootPage())
-                f.addFolder();
-        });
+		setWillNotDraw(false); // The empty-state message is drawn in onDraw().
+	}
+
+	/** RecyclerView never calls performClick(), so taps on the empty library are detected here. */
+	@Override
+	public boolean onTouchEvent(android.view.MotionEvent e) {
+		boolean handled = super.onTouchEvent(e);
+		if ((e.getActionMasked() == android.view.MotionEvent.ACTION_UP) && isEmptyLibraryRoot()
+				&& ((e.getEventTime() - e.getDownTime()) < android.view.ViewConfiguration.getLongPressTimeout())
+				&& (getActivity().getActiveFragment() instanceof me.aap.fermata.ui.fragment.FoldersFragment f)) {
+			f.addFolder();
+			return true;
+		}
+		return handled;
+	}
+
+	private boolean isEmptyLibraryRoot() {
+		var adapter = (MediaItemListViewAdapter) super.getAdapter();
+		if ((adapter == null) || (adapter.getItemCount() != 0) || adapter.isLoading() || adapter.isFiltered())
+			return false;
+		var f = getActivity().getActiveFragment();
+		return (f instanceof me.aap.fermata.ui.fragment.FoldersFragment ff) && (ff.getView() == this) && ff.isRootPage();
 	}
 
 	@Override
@@ -72,6 +89,8 @@ public class MediaItemListView extends RecyclerView implements PreferenceStore.L
                 setPadding(edge,0,edge,0);
             } else {
                 coverFlow.setEnabled(false); setPadding(0,0,0,0);
+                setBackground(null); setOverScrollMode(OVER_SCROLL_IF_CONTENT_SCROLLS);
+                setVerticalScrollBarEnabled(true);
 				setLayoutManager(new LinearLayoutManager(ctx));
 			}
 		});
@@ -97,16 +116,28 @@ public class MediaItemListView extends RecyclerView implements PreferenceStore.L
         });
     }
 
+    private android.graphics.Paint emptyTitlePaint, emptyHintPaint;
+
     @Override public void onDraw(android.graphics.Canvas canvas) {
         super.onDraw(canvas);
-        if(super.getAdapter()==null||super.getAdapter().getItemCount()!=0)return;
-        android.graphics.Paint paint=new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(ZairNavigation.color(getContext(),android.R.attr.textColorSecondary));
-        paint.setTextAlign(android.graphics.Paint.Align.CENTER);
-        paint.setTextSize(ZairNavigation.dp(getContext(),18));
-        canvas.drawText(getResources().getString(me.aap.fermata.R.string.zair_no_items),getWidth()/2f,getHeight()/2f,paint);
-        paint.setTextSize(ZairNavigation.dp(getContext(),12));
-        canvas.drawText(getResources().getString(me.aap.fermata.R.string.zair_empty_library_hint),getWidth()/2f,getHeight()/2f+ZairNavigation.dp(getContext(),28),paint);
+        var adapter=(MediaItemListViewAdapter)super.getAdapter();
+        // Nothing to say while the folder is still loading: the progress bar is visible.
+        if(adapter==null||adapter.getItemCount()!=0||adapter.isLoading()||adapter.getParent()==null)return;
+        Context ctx=getContext();
+        if(emptyTitlePaint==null){
+            emptyTitlePaint=new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+            emptyTitlePaint.setTextAlign(android.graphics.Paint.Align.CENTER);
+            emptyTitlePaint.setTextSize(ZairNavigation.dp(ctx,18));
+            emptyHintPaint=new android.graphics.Paint(emptyTitlePaint);
+            emptyHintPaint.setTextSize(ZairNavigation.dp(ctx,13));
+        }
+        int color=ZairNavigation.color(ctx,android.R.attr.textColorSecondary);
+        emptyTitlePaint.setColor(color);emptyHintPaint.setColor(color);
+        float cx=getScrollX()+getWidth()/2f, cy=getScrollY()+getHeight()/2f;
+        String title=getResources().getString(adapter.isFiltered()?me.aap.fermata.R.string.zair_no_results:me.aap.fermata.R.string.zair_no_items);
+        canvas.drawText(title,cx,cy,emptyTitlePaint);
+        if(isEmptyLibraryRoot())
+            canvas.drawText(getResources().getString(me.aap.fermata.R.string.zair_empty_library_hint),cx,cy+ZairNavigation.dp(ctx,28),emptyHintPaint);
     }
 
 	@NonNull

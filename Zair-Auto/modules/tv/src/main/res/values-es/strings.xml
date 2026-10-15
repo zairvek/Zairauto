@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Zair Auto: traducción al español, 2026-10-15. GPL-3.0. -->
+<resources>
+    <string name="sub_ch">Canales: %1$d.</string>
+    <string name="sub_gr">Grupos: %1$d.</string>
+    <string name="sub_ch_gr">Canales: %1$d. Grupos: %2$d.</string>
+    <string name="add_tv_source">Agregar fuente IPTV M3U</string>
+    <string name="epg_time_shift">Desfase horario de EPG (horas)</string>
+    <string name="logo">Logotipos de canales</string>
+    <string name="logo_location">Ubicación</string>
+    <string name="logo_location_hint">Carpeta o URL base http(s)</string>
+    <string name="logo_prefer_epg">Preferir logotipos de la EPG</string>
+    <string name="catchup_query">Formato de consulta</string>
+    <string name="catchup_type">Tipo de catchup</string>
+    <string name="catchup_type_cur">Tipo de catchup actual: %1$s</string>
+    <string name="catchup_type_auto">Automático</string>
+    <string name="catchup_days">Número de días</string>
+    <string name="connection_settings">Configuración de conexión</string>
+
+    <string name="err_failed_to_add_tv_source">No se pudo agregar la fuente: %1$s</string>
+</resources>

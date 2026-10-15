@@ -117,10 +117,25 @@ public final class ZairDiagnostics {
             return output;
         }).main().onSuccess(output -> {
             if (a.getSupportFragmentManager().isDestroyed()) return;
-            var uri = FileProvider.getUriForFile(app, app.getPackageName() + ".FileProvider", output);
             Intent intent = new Intent(Intent.ACTION_SEND).setType("text/plain")
-                    .putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            a.startActivity(Intent.createChooser(intent, a.getContext().getString(R.string.zair_share_report)));
-        }).onFailure(error -> me.aap.utils.ui.UiUtils.showAlert(a.getContext(), error.getMessage()));
+                    .putExtra(Intent.EXTRA_SUBJECT, "Zair Auto " + BuildConfig.VERSION_NAME);
+            try {
+                var uri = FileProvider.getUriForFile(app, app.getPackageName() + ".FileProvider", output);
+                intent.putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            } catch (IllegalArgumentException noProvider) {
+                // The mobile flavor declares no FileProvider: share the report as plain text.
+                try (var in = new java.io.FileInputStream(output)) {
+                    intent.putExtra(Intent.EXTRA_TEXT, readBounded(in));
+                } catch (java.io.IOException ex) {
+                    me.aap.utils.ui.UiUtils.showAlert(a.getContext(), ex.getLocalizedMessage());
+                    return;
+                }
+            }
+            try {
+                a.startActivity(Intent.createChooser(intent, a.getContext().getString(R.string.zair_share_report)));
+            } catch (android.content.ActivityNotFoundException ex) {
+                me.aap.utils.ui.UiUtils.showAlert(a.getContext(), ex.getLocalizedMessage());
+            }
+        }).onFailure(error -> me.aap.utils.ui.UiUtils.showAlert(a.getContext(), error.getLocalizedMessage()));
     }
 }

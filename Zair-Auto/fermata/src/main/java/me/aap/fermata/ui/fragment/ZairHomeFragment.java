@@ -51,12 +51,14 @@ public final class ZairHomeFragment extends MainActivityFragment implements Medi
         root.addView(shelf,new LinearLayout.LayoutParams(-1,0,1));
         status=new TextView(c);status.setGravity(Gravity.CENTER);status.setTextSize(12);
         status.setTextColor(ZairNavigation.color(c,android.R.attr.textColorSecondary));
-        status.setPadding(dp(18),dp(8),dp(18),dp(18));status.setMaxLines(2);
+        status.setPadding(dp(18),dp(8),dp(18),dp(18));status.setMaxLines(2);status.setEllipsize(TextUtils.TruncateAt.END);
         status.setText(R.string.zair_shelf_hint);root.addView(status,new LinearLayout.LayoutParams(-1,-2));
-        refresh();return root;
+        return root; // Filled by onStart().
     }
     @Override public void onStart(){
-        super.onStart();callback=getActivityDelegate().getMediaSessionCallback();callback.addBroadcastListener(this);refresh();
+        super.onStart();callback=getActivityDelegate().getMediaSessionCallback();
+        if(callback!=null)callback.addBroadcastListener(this);
+        refresh();
     }
     @Override public void onStop(){
         if(callback!=null)callback.removeBroadcastListener(this);callback=null;super.onStop();
@@ -75,8 +77,9 @@ public final class ZairHomeFragment extends MainActivityFragment implements Medi
     private void updateStatus(){
         if(status==null)return;
         var binder=getActivityDelegate().getMediaServiceBinder();
-        if(binder.getCurrentItem()==null)status.setText(R.string.zair_shelf_hint);
-        else status.setText(binder.isPlaying()?R.string.zair_playing:R.string.zair_shelf_hint);
+        var current=binder.getCurrentItem();
+        if(current==null||!binder.isPlaying())status.setText(R.string.zair_shelf_hint);
+        else status.setText(getString(R.string.zair_playing)+" · "+current.getName());
     }
     private void refresh(){
         if(shelf==null||adapter==null)return;

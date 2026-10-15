@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Zair Auto: traducción al español, 2026-10-15. GPL-3.0. -->
+<resources>
+    <string name="dict_folder">Carpeta de diccionarios</string>
+    <string name="cache_folder">Carpeta de caché</string>
+    <string name="stt_service">Servicio de voz a texto</string>
+    <string name="dict_sub1">Palabras: %1$d</string>
+    <string name="dict_sub2">Palabras: %1$d. Progreso: %2$d/%3$d.</string>
+    <string name="start_tutor">Iniciar tutor</string>
+    <string name="start_tutor_dir">Traducción directa</string>
+    <string name="start_tutor_rev">Traducción inversa</string>
+    <string name="start_tutor_mix">Mixto</string>
+    <string name="start_tutor_listen">Comprensión auditiva</string>
+    <string name="offline_mode">Modo sin conexión</string>
+    <string name="add_dict">Agregar diccionario</string>
+    <string name="dict_name">Nombre del diccionario</string>
+    <string name="src_lang">Idioma de origen</string>
+    <string name="target_lang">Idioma de destino</string>
+    <string name="ack_phrase">Frase de confirmación</string>
+    <string name="ack_phrase_sub">Lo sé | I know</string>
+    <string name="skip_phrase">Frase para omitir</string>
+    <string name="skip_phrase_sub">Siguiente | No lo sé | Skip | I don\'t know</string>
+    <string name="no_lang_supported">El TTS no admite ningún idioma</string>
+    <string name="add_word">Agregar palabra</string>
+    <string name="add_trans">Agregar traducción</string>
+    <string name="add_example">Agregar ejemplo</string>
+    <string name="word">Palabra</string>
+    <string name="trans">Traducción</string>
+    <string name="example">Ejemplo</string>
+    <string name="example_trans">Traducción del ejemplo</string>
+    <string name="wipe_prog">Borrar progreso</string>
+    <string name="wipe_prog_for">¿Borrar el progreso de %1$s?</string>
+    <string name="change_prog">Cambiar progreso</string>
+    <string name="dir_prog">Progreso directo</string>
+    <string name="rev_prog">Progreso inverso</string>
+    <string name="import_dict">Importar diccionario</string>
+    <string name="import_dict_q">¿Importar el diccionario %1$s?</string>
+    <string name="import_dict_exist">¿Agregar palabras al diccionario existente %1$s?</string>
+    <string name="err_invalid_dict_hdr">Encabezado de diccionario no válido: %1$s</string>
+    <string name="err_invalid_name">Nombre no válido: %1$s</string>
+</resources>

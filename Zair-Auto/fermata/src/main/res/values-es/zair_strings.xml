@@ -38,7 +38,8 @@
   <string name="zair_search">Buscar en la biblioteca</string>
   <string name="zair_shelf_hint">Desliza para elegir · Toca para abrir</string>
   <string name="zair_no_items">Todavía no hay elementos</string>
-  <string name="zair_empty_library_hint">Abre el menú para agregar tu contenido</string>
+  <string name="zair_empty_library_hint">Toca aquí o abre el menú para agregar una carpeta</string>
   <string name="zair_share_report">Compartir informe del fallo</string>
   <string name="zair_auto_modes">Zair Auto · Audio es el navegador de audio de Android Auto: su pantalla la dibuja Android Auto y no muestra YouTube ni este carrusel. La interfaz completa de proyección de Fermata tiene carrusel y YouTube cuando su módulo está activado, pero el acceso depende de tu instalación de Android Auto. Cambiar el nombre o el diseño no desbloquea la proyección. El video en el vehículo es para uso estacionado.</string>
+  <string name="zair_no_results">Sin resultados</string>
 </resources>

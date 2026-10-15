@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Zair Auto: traducción al español, 2026-10-15. GPL-3.0. -->
+<resources>
+    <string name="poi_file_or_url">Archivo o URL de la base de datos de POI</string>
+    <string name="locale">es</string>
+    <string name="speed_unit">km/h</string>
+    <string name="distance_unit">m</string>
+    <string name="speed_limit_i">El límite de velocidad es de ${speed_limit} ${speed_unit}</string>
+    <string name="speed_limit_a">En ${distance} ${distance_unit} el límite de velocidad es de ${speed_limit} ${speed_unit}</string>
+    <string name="speed_limit_w">¡Tu velocidad de ${speed} ${speed_unit} supera el máximo permitido de ${speed_limit} ${speed_unit}!</string>
+</resources>

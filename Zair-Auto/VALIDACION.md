@@ -1,3 +1,18 @@
+# Validación de Zair Auto 0.2.2
+
+Fecha: 15 de octubre de 2026. Versión 0.2.2-zair, código 4.
+
+- `fermata:packageAutoReleaseUniversalApk -PZAIR_CORE=true -PABI=arm64-v8a`: compilación correcta,
+  con R8 y `lintVitalAutoRelease` aprobados.
+- `verification/run-checks.sh`: 20 casos de motores/enlaces, 113 de geometría, XML válidos y claves
+  español/inglés de Zair coincidentes.
+- Traducciones al español comprobadas contra el inglés: mismos nombres, mismos marcadores de formato
+  (`%1$s`, `%d`…) y XML válido en los 8 archivos.
+- No se probó en teléfono, emulador ni vehículo (el entorno no tiene virtualización). El APK compilado
+  aquí está firmado con una clave de prueba distinta de la de 0.2.1.
+
+---
+
 # Validación de Zair Auto 0.2.1
 
 Fecha: 14 de octubre de 2026. Base Fermata 2.0.2. Versión 0.2.1-zair, código 3.

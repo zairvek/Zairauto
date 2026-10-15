@@ -43,6 +43,7 @@ public class MediaItemListViewAdapter extends MovableRecyclerViewAdapter<MediaIt
 	private Pattern filter;
 	private MediaItemListView listView;
 	private List<MediaItemWrapper> list = Collections.emptyList();
+	private boolean loading;
 
 	public MediaItemListViewAdapter(MainActivityDelegate activity) {
 		this.activity = activity;
@@ -55,6 +56,15 @@ public class MediaItemListViewAdapter extends MovableRecyclerViewAdapter<MediaIt
 
 	public void setListView(@NonNull MediaItemListView listView) {
 		this.listView = listView;
+	}
+
+	/** True until the children of the current parent are loaded. */
+	public boolean isLoading() {
+		return loading;
+	}
+
+	public boolean isFiltered() {
+		return filter != null;
 	}
 
 	public BrowsableItem getParent() {
@@ -76,6 +86,7 @@ public class MediaItemListViewAdapter extends MovableRecyclerViewAdapter<MediaIt
 		if (this.parent != null) this.parent.removeChangeListener(this);
 		this.parent = parent;
 		list = Collections.emptyList();
+		loading = (parent != null);
 		notifyChanged();
 		if (parent == null) return completedVoid();
 		parent.addChangeListener(this);
@@ -83,6 +94,10 @@ public class MediaItemListViewAdapter extends MovableRecyclerViewAdapter<MediaIt
 		FutureSupplier<?> f = parent.getChildren().main()
 				.addConsumer((result, fail, progress, total) -> {
 					if (this.parent != parent) return;
+					if ((fail == null) || !isCancellation(fail)) {
+						loading = false;
+						if (listView != null) listView.invalidate();
+					}
 
 					if (fail != null) {
 						if (isCancellation(fail)) return;

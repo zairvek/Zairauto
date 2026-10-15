@@ -684,6 +684,9 @@ public class MainActivityDelegate extends ActivityDelegate
         if (getToolBar()!=null && getToolBar().onBackPressed()) return;
         ActivityFragment fragment=getActiveFragment();
         if(fragment!=null && fragment.onBackPressed()) return;
+        // Fullscreen video started from Home or another section: Back first restores the UI.
+        BodyLayout body=getBody();
+        if(body!=null && body.isVideoMode()) { body.setMode(BodyLayout.Mode.BOTH); return; }
         if(fragment!=null && fragment.getFragmentId()!=R.id.zair_home_fragment) {
             showFragment(R.id.zair_home_fragment); return;
         }

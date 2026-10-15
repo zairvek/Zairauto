@@ -38,7 +38,8 @@
   <string name="zair_search">Search library</string>
   <string name="zair_shelf_hint">Swipe to choose · Tap to open</string>
   <string name="zair_no_items">No items yet</string>
-  <string name="zair_empty_library_hint">Open the menu to add your content</string>
+  <string name="zair_empty_library_hint">Tap here or open the menu to add a folder</string>
   <string name="zair_share_report">Share error report</string>
   <string name="zair_auto_modes">Zair Auto · Audio is the Android Auto audio browser: its screen is drawn by Android Auto and does not show YouTube or this carousel. The full Fermata projection interface has the carousel and YouTube when its module is enabled, but access depends on your Android Auto installation. Renaming the app or redesigning it does not unlock projection. Video in a vehicle is for parked use.</string>
+  <string name="zair_no_results">No results</string>
 </resources>

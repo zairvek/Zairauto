@@ -70,6 +70,8 @@ import me.aap.utils.ui.menu.OverlayMenu;
  */
 public class MediaItemView extends ConstraintLayout
 		implements OnLongClickListener, OnCheckedChangeListener, Item.ChangeListener {
+	private android.graphics.drawable.GradientDrawable coverFrame;
+	private float listElevation;
 	private static final RotateAnimation rotate =
 			new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
 					0.5f);
@@ -101,7 +103,8 @@ public class MediaItemView extends ConstraintLayout
 		hintColor = ta.getColor(R.styleable.MediaItemView_hintColor, 0);
 		titleTextAppearance = ta.getResourceId(R.styleable.MediaItemView_titleTextAppearance, 0);
 		subtitleTextAppearance = ta.getResourceId(R.styleable.MediaItemView_subtitleTextAppearance, 0);
-		setElevation(ta.getDimension(R.styleable.MediaItemView_elevation, 0));
+		listElevation = ta.getDimension(R.styleable.MediaItemView_elevation, 0);
+		setElevation(listElevation);
 		textTint = ta.getColorStateList(R.styleable.MediaItemView_android_textColor);
 		ta.recycle();
 		MainActivityDelegate a = getMainActivity();
@@ -110,7 +113,8 @@ public class MediaItemView extends ConstraintLayout
 		setLongClickable(true);
 		setOnLongClickListener(this);
 		getCheckBox().setOnCheckedChangeListener(this);
-		setBackgroundResource(R.drawable.media_item_bg);
+		// setSize() has already chosen the cover background in cover mode.
+		if (!a.isGridView()) setBackgroundResource(R.drawable.media_item_bg);
 		setFocusable(true);
 	}
 
@@ -138,12 +142,16 @@ public class MediaItemView extends ConstraintLayout
             ConstraintLayout.LayoutParams iconParams=(ConstraintLayout.LayoutParams)getIcon().getLayoutParams();
             iconParams.width=ZairNavigation.dp(ctx,geo.posterWidth);iconParams.height=ZairNavigation.dp(ctx,geo.posterHeight);
             iconParams.dimensionRatio=null;getIcon().setLayoutParams(iconParams);
-            android.graphics.drawable.GradientDrawable frame=new android.graphics.drawable.GradientDrawable();
-            frame.setColor(0xff111b27);frame.setCornerRadius(ZairNavigation.dp(ctx,4));frame.setStroke(ZairNavigation.dp(ctx,1),0xff405a70);
-            getIcon().setBackground(frame);getIcon().setPadding(3,3,3,3);getIcon().setClipToOutline(true);
-            setBackgroundColor(android.graphics.Color.TRANSPARENT);setElevation(0);
+            if(coverFrame==null){
+                coverFrame=new android.graphics.drawable.GradientDrawable();
+                coverFrame.setColor(0xff111b27);coverFrame.setCornerRadius(ZairNavigation.dp(ctx,4));coverFrame.setStroke(ZairNavigation.dp(ctx,1),0xff405a70);
+            }
+            int pad=ZairNavigation.dp(ctx,1.5f);
+            getIcon().setBackground(coverFrame);getIcon().setPadding(pad,pad,pad,pad);getIcon().setClipToOutline(true);
+            setBackgroundResource(R.drawable.zair_cover_bg);setElevation(0);
         } else {
-            getIcon().setBackground(null);getIcon().setPadding(0,0,0,0);setBackgroundResource(R.drawable.media_item_bg);
+            getIcon().setBackground(null);getIcon().setPadding(0,0,0,0);getIcon().setClipToOutline(false);
+            setBackgroundResource(R.drawable.media_item_bg);setElevation(listElevation);
             var params=getLayoutParams();
             if(params!=null){params.width=ViewGroup.LayoutParams.MATCH_PARENT;params.height=ViewGroup.LayoutParams.WRAP_CONTENT;setLayoutParams(params);}
         }

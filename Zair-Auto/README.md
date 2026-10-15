@@ -2,7 +2,7 @@
 
 Fork independiente de Fermata Media Player con carrusel de portadas, menú lateral y correcciones de navegación y reproducción.
 
-**Versión de prueba 0.2.1 · Android 9+ · ARM64 · GPL-3.0**
+**Versión de prueba 0.2.2 · Android 9+ · ARM64 · GPL-3.0**
 
 - [Uso, límites y compilación](LEEME-ZAIR.md)
 - [Cambios del fork y atribución](CAMBIOS-ZAIR.md)
