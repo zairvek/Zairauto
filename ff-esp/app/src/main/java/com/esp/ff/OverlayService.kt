@@ -4,37 +4,39 @@ import android.app.*
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.*
+import android.view.Gravity
 import android.view.WindowManager
 
 class OverlayService : Service() {
 
-    private lateinit var wm: WindowManager
-    private lateinit var espView: ESPView
+    private lateinit var wm:       WindowManager
+    private lateinit var espView:  ESPView
     private lateinit var ctrlView: ControlView
 
-    private val handler = Handler(Looper.getMainLooper())
+    private val handler  = Handler(Looper.getMainLooper())
     private var libBase  = 0L
     private var pid      = -1
 
-    // Config — modified by ControlView callbacks (main thread, no lock needed)
-    private var espEnabled  = true
-    private var aimbotOn    = false
-    private var aimbotFov   = 60f
+    private var espEnabled   = true
+    private var aimbotOn     = false
+    private var aimbotFov    = 60f
     private var aimbotSmooth = 0.20f
+
+    // Cached VP matrix so the ESP can draw even between read ticks
+    private var vpCache = FloatArray(16)
 
     private val tick = object : Runnable {
         override fun run() {
-            try { readAndDraw() } catch (_: Exception) {}
+            try { readTick() } catch (_: Exception) {}
             handler.postDelayed(this, 16)
         }
     }
 
     override fun onCreate() {
         super.onCreate()
-        startForeground(1, buildNotification())
+        startForeground(1, buildNotif())
         wm = getSystemService(WINDOW_SERVICE) as WindowManager
 
-        // Transparent full-screen ESP layer (click-through)
         espView = ESPView(this)
         wm.addView(espView, WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
@@ -46,20 +48,17 @@ class OverlayService : Service() {
             PixelFormat.TRANSLUCENT
         ))
 
-        // Small touchable control panel (top-left corner)
         ctrlView = ControlView(this,
-            onEspToggle    = { espEnabled   = it },
+            onEspToggle    = { espEnabled  = it },
             onAimbotToggle = { v -> aimbotOn = v; espView.aimbotOn = v },
             onFovChange    = { v -> aimbotFov = v; espView.aimbotFov = v },
             onSmoothChange = { aimbotSmooth = it }
         )
-        val ctrlParams = WindowManager.LayoutParams(
-            220, 200,
+        wm.addView(ctrlView, WindowManager.LayoutParams(220, 200,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
-        ).apply { gravity = android.view.Gravity.TOP or android.view.Gravity.START; x = 20; y = 80 }
-        wm.addView(ctrlView, ctrlParams)
+        ).also { it.gravity = Gravity.TOP or Gravity.START; it.x = 20; it.y = 80 })
 
         attach()
         handler.post(tick)
@@ -72,119 +71,139 @@ class OverlayService : Service() {
         libBase = MemReader.getModuleBase(pid, GAMEASSEMBLY)
     }
 
-    private fun readAndDraw() {
+    // ── IL2CPP static field access ──────────────────────────────────────────
+    // typeInfoOff: libBase + typeInfoOff = Il2CppClass*
+    // fieldOff: offset within StaticFields struct
+    private fun getStaticInstance(typeInfoOff: Long, fieldOff: Long): Long {
+        val classPtr  = MemReader.readPtr(libBase + typeInfoOff)
+        if (classPtr < 0x1000) return 0L
+        val sfPtr     = MemReader.readPtr(classPtr + IL2CPP_STATIC_FIELDS)
+        if (sfPtr < 0x1000) return 0L
+        return MemReader.readPtr(sfPtr + fieldOff)
+    }
+
+    // ── Transform → world position ──────────────────────────────────────────
+    // Reads position using Option A (transform ref field) with fallback to Option B (direct Vec3).
+    private fun getPlayerPos(playerPtr: Long): FloatArray? {
+        // Option B: direct cached Vector3
+        if (Off.PLAYER_POS_DIRECT != 0L) {
+            val p = MemReader.readFloats(playerPtr + Off.PLAYER_POS_DIRECT, 3)
+            if (p[0] != 0f || p[1] != 0f || p[2] != 0f) return p
+        }
+
+        // Option A: Transform component → native ptr → position
+        if (Off.PLAYER_TRANSFORM == 0L) return null
+        val transformRef = MemReader.readPtr(playerPtr + Off.PLAYER_TRANSFORM)
+        if (transformRef < 0x1000) return null
+        val nativeTf = MemReader.readPtr(transformRef + Off.COMPONENT_NATIVE)
+        if (nativeTf < 0x1000) return null
+        val pos = MemReader.readFloats(nativeTf + Off.NATIVE_POS, 3)
+        return if (pos[0] == 0f && pos[1] == 0f && pos[2] == 0f) null else pos
+    }
+
+    // ── Camera ─────────────────────────────────────────────────────────────
+    private fun getCamData(): Triple<FloatArray, FloatArray, Long>? {
+        // Returns: (VP matrix float[16], camPos float[3], ctrlNativePtr)
+        val camInst = getStaticInstance(Off.CAM_TYPE_INFO, Off.CAM_STATIC_INSTANCE)
+        if (camInst < 0x1000) return null
+        val nativeCam = MemReader.readPtr(camInst + Off.COMPONENT_NATIVE)
+        if (nativeCam < 0x1000) return null
+
+        val vp  = if (Off.NATIVE_CAM_VP != 0L) MemReader.readFloats(nativeCam + Off.NATIVE_CAM_VP, 16)
+                  else vpCache  // stale but better than nothing
+        val pos = MemReader.readFloats(nativeCam + Off.NATIVE_POS, 3)
+        return Triple(vp, pos, nativeCam)
+    }
+
+    // ── Main tick ───────────────────────────────────────────────────────────
+    private fun readTick() {
         if (pid < 0 || libBase == 0L) { attach(); return }
 
-        // ── VP matrix ───────────────────────────────────────
-        val camStaticPtr = MemReader.readPtr(libBase + Off.CAMERA_CTRL_STATIC)
-        val camInstance  = MemReader.readPtr(camStaticPtr)
-        val nativeCam    = MemReader.readPtr(camInstance + Off.CAM_CACHED_PTR)
-        val vm           = MemReader.readFloats(nativeCam + Off.NATIVE_CAM_VP, 16)
-        espView.vpMatrix = vm
+        // Camera
+        val camData = getCamData()
+        val vm      = camData?.first ?: FloatArray(16)
+        val camPos  = camData?.second ?: FloatArray(3)
+        val ctrlPtr = camData?.third ?: 0L
+        if (vm.any { it != 0f }) vpCache = vm
+        espView.vpMatrix = vpCache
 
-        // Camera world position: read from camera's transform
-        val camPos = MemReader.readVec3(nativeCam + Off.NATIVE_TRANSFORM_POS)
-        val camX = camPos[0]; val camY = camPos[1]; val camZ = camPos[2]
+        // Camera forward from view matrix rows (row 2 = -forward in OpenGL/Unity)
+        val fwdX = -vpCache[8]; val fwdY = -vpCache[9]; val fwdZ = -vpCache[10]
+        val curYaw   = if (ctrlPtr > 0L && Off.CAM_YAW   != 0L) MemReader.readFloat(ctrlPtr + Off.CAM_YAW)   else 0f
+        val curPitch = if (ctrlPtr > 0L && Off.CAM_PITCH != 0L) MemReader.readFloat(ctrlPtr + Off.CAM_PITCH) else 0f
 
-        // Camera forward from VP matrix row 2 (negated because view space -Z = forward)
-        // vm[8], vm[9], vm[10] = -forward in the view matrix portion
-        val fwdX = -vm[8]; val fwdY = -vm[9]; val fwdZ = -vm[10]
+        // Player list
+        val pmInst   = getStaticInstance(Off.PM_TYPE_INFO, Off.PM_STATIC_INSTANCE)
+        if (pmInst < 0x1000) return
+        val listPtr  = MemReader.readPtr(pmInst + Off.PM_PLAYER_LIST)
+        val itemsPtr = MemReader.readPtr(listPtr + Off.LIST_ITEMS)
+        val count    = MemReader.readInt(listPtr + Off.LIST_SIZE).coerceIn(0, 32)
 
-        // ── Current aim angles (for aimbot write-back) ───────
-        val camCtrlStatic = MemReader.readPtr(libBase + Off.CAMERA_CTRL_STATIC)
-        val camCtrlInst   = MemReader.readPtr(camCtrlStatic)
-        val ctrlNative    = MemReader.readPtr(camCtrlInst + Off.CAM_CTRL_CACHED_PTR)
-        val curYaw        = MemReader.readFloat(ctrlNative + Off.CAM_CTRL_YAW)
-        val curPitch      = MemReader.readFloat(ctrlNative + Off.CAM_CTRL_PITCH)
-
-        // ── Player list ──────────────────────────────────────
-        val pmStaticPtr  = MemReader.readPtr(libBase + Off.PLAYER_MANAGER_STATIC)
-        val pmInstance   = MemReader.readPtr(pmStaticPtr)
-        val listPtr      = MemReader.readPtr(pmInstance + Off.PM_PLAYER_LIST)
-        val itemsPtr     = MemReader.readPtr(listPtr + Off.LIST_ITEMS)
-        val count        = MemReader.readInt((listPtr + Off.LIST_SIZE)).coerceIn(0, 32)
-
-        val players = mutableListOf<PlayerData>()
-        val enemyPos = mutableListOf<Float>()    // flat {x,y,z,...} para findBestTarget
+        val players   = mutableListOf<PlayerData>()
+        val enemyPosFlat = mutableListOf<Float>()
 
         for (i in 0 until count) {
             val ptr = MemReader.readPtr(itemsPtr + 0x20 + i * 8L)
             if (ptr < 0x1000) continue
-            if (!MemReader.readBool(ptr + Off.PLAYER_IS_ALIVE)) continue
-
-            val hp    = MemReader.readFloat(ptr + Off.PLAYER_HP)
-            val maxHp = MemReader.readFloat(ptr + Off.PLAYER_HP_MAX).coerceAtLeast(1f)
+            if (Off.PLAYER_IS_ALIVE != 0L && !MemReader.readBool(ptr + Off.PLAYER_IS_ALIVE)) continue
+            val hp    = if (Off.PLAYER_HP     != 0L) MemReader.readFloat(ptr + Off.PLAYER_HP)     else 100f
+            val maxHp = if (Off.PLAYER_HP_MAX != 0L) MemReader.readFloat(ptr + Off.PLAYER_HP_MAX) else 100f
             if (hp <= 0f) continue
 
-            val isEnemy = MemReader.readBool(ptr + Off.PLAYER_IS_ENEMY)
+            val isEnemy = when {
+                Off.PLAYER_IS_ENEMY != 0L -> MemReader.readBool(ptr + Off.PLAYER_IS_ENEMY)
+                else -> true  // assume all visible = enemies if no team field
+            }
 
-            val tfComp   = MemReader.readPtr(ptr + Off.PLAYER_TRANSFORM_COMP)
-            val nativeTf = MemReader.readPtr(tfComp + Off.PLAYER_TRANSFORM_COMP)
-            val pos      = MemReader.readVec3(nativeTf + Off.NATIVE_TRANSFORM_POS)
-            if (pos[0] == 0f && pos[1] == 0f && pos[2] == 0f) continue
+            val pos = getPlayerPos(ptr) ?: continue
+            val namePtr = if (Off.PLAYER_NAME_PTR != 0L) MemReader.readPtr(ptr + Off.PLAYER_NAME_PTR) else 0L
+            val name    = if (namePtr > 0x1000) MemReader.readUnityString(namePtr) else ""
 
-            val namePtr = MemReader.readPtr(ptr + Off.PLAYER_NAME_PTR)
-            val name    = MemReader.readUnityString(namePtr)
+            val relX = pos[0] - camPos[0]
+            val relY = pos[1] - camPos[1]
+            val relZ = pos[2] - camPos[2]
 
-            players += PlayerData(pos[0]-camX, pos[1]-camY, pos[2]-camZ, hp, maxHp, isEnemy, name)
-            if (isEnemy) { enemyPos += pos[0]; enemyPos += pos[1]+1.4f; enemyPos += pos[2] } // head
+            players += PlayerData(relX, relY, relZ, hp, maxHp, isEnemy, name)
+            if (isEnemy) {
+                enemyPosFlat += pos[0]; enemyPosFlat += pos[1] + 1.4f; enemyPosFlat += pos[2]
+            }
         }
 
-        // ── Aimbot ───────────────────────────────────────────
+        // Aimbot
         var targetIdx = -1
-        if (aimbotOn && enemyPos.size >= 3) {
-            val posArr   = enemyPos.toFloatArray()
-            val enemyCnt = posArr.size / 3
-            targetIdx = MemReader.findBestTarget(
-                posArr, enemyCnt,
-                camX, camY, camZ,
+        if (aimbotOn && ctrlPtr > 0L && Off.CAM_YAW != 0L && enemyPosFlat.size >= 3) {
+            val posArr = enemyPosFlat.toFloatArray()
+            targetIdx  = MemReader.findBestTarget(
+                posArr, posArr.size / 3,
+                camPos[0], camPos[1], camPos[2],
                 fwdX, fwdY, fwdZ,
                 aimbotFov
             )
             if (targetIdx >= 0) {
-                val tx = posArr[targetIdx*3+0]
-                val ty = posArr[targetIdx*3+1]
-                val tz = posArr[targetIdx*3+2]
-                val angles = MemReader.calcAim(
-                    camX, camY, camZ, tx, ty, tz,
-                    curYaw, curPitch, aimbotSmooth
-                )
-                // Write new angles to camera controller
-                MemReader.writeFloat(ctrlNative + Off.CAM_CTRL_YAW,   angles[0])
-                MemReader.writeFloat(ctrlNative + Off.CAM_CTRL_PITCH, angles[1])
+                val tx = posArr[targetIdx*3]; val ty = posArr[targetIdx*3+1]; val tz = posArr[targetIdx*3+2]
+                val a  = MemReader.calcAim(camPos[0],camPos[1],camPos[2], tx,ty,tz, curYaw,curPitch, aimbotSmooth)
+                MemReader.writeFloat(ctrlPtr + Off.CAM_YAW,   a[0])
+                MemReader.writeFloat(ctrlPtr + Off.CAM_PITCH, a[1])
             }
         }
 
-        // Mark aimbot target for ESP highlight
-        val finalList = players.mapIndexed { i, p ->
-            p.copy(isTarget = aimbotOn && i == targetIdx)
-        }
-
-        if (espEnabled) {
-            espView.players = finalList
-            espView.postInvalidate()
-        } else {
-            espView.players = emptyList()
-            espView.postInvalidate()
-        }
+        val final = players.mapIndexed { i, p -> p.copy(isTarget = aimbotOn && i == targetIdx) }
+        espView.players = if (espEnabled) final else emptyList()
+        espView.postInvalidate()
     }
 
     override fun onDestroy() {
         handler.removeCallbacks(tick)
-        wm.removeView(espView)
-        wm.removeView(ctrlView)
+        wm.removeView(espView); wm.removeView(ctrlView)
         super.onDestroy()
     }
+    override fun onBind(i: Intent?) = null
 
-    override fun onBind(intent: Intent?) = null
-
-    private fun buildNotification(): Notification {
-        val ch = "esp"
+    private fun buildNotif(): Notification {
+        val ch = "esp_ch"
         getSystemService(NotificationManager::class.java)
             .createNotificationChannel(NotificationChannel(ch, "ESP", NotificationManager.IMPORTANCE_LOW))
-        return Notification.Builder(this, ch)
-            .setContentTitle("FF ESP+AIM activo")
-            .setSmallIcon(android.R.drawable.ic_menu_view)
-            .build()
+        return Notification.Builder(this, ch).setContentTitle("FF ESP activo")
+            .setSmallIcon(android.R.drawable.ic_menu_view).build()
     }
 }

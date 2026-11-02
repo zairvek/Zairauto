@@ -1,53 +1,70 @@
 package com.esp.ff
 
-// Dump con Il2CppDumper → grep dump.cs por los nombres de clase abajo.
-// adb pull libGameAssembly.so + global-metadata.dat del APK, luego:
-//   Il2CppDumper.exe libGameAssembly.so global-metadata.dat out/
+// ── Cómo llenar este archivo ──────────────────────────────────────────────
+//
+// 1. Correr tools/dump_parser.py → genera este archivo automáticamente.
+//    Si los nombres de clase no matchean, completar manualmente con dump.cs.
+//
+// 2. Para los TypeInfo offsets, correr tools/frida_statics.js.
+//    Output: "FightingFighterManager TypeInfo: 0x..."  ← ese valor va aquí.
+//
+// 3. Para NATIVE_TRANSFORM_POS: freezar XY en GameGuardian mientras te movés
+//    y hacer pointer scan desde la base del jugador.
+//
+// ─────────────────────────────────────────────────────────────────────────
 
-const val FF_PACKAGE   = "com.dts.freefireth"   // MAX = com.dts.freefiremax
+const val FF_PACKAGE   = "com.dts.freefireth"  // MAX = com.dts.freefiremax
 const val GAMEASSEMBLY = "libGameAssembly.so"
+
+// Offset de static_fields dentro de Il2CppClass (arm64).
+// Unity 2019.4 = 0xB8.  Si no funciona probar 0xC0, 0xD0.
+const val IL2CPP_STATIC_FIELDS = 0xB8L
 
 object Off {
 
-    // ── Punteros estáticos (libBase + X = dirección del static fields ptr) ───
-    // dump.cs: buscar "class FightingFighterManager" o "BattleRoyalePlayerManager"
-    // luego el campo static: "FightingFighterManager m_pInstance" o similar
-    const val PLAYER_MANAGER_STATIC = 0x0L          // FILL
+    // ── TypeInfo offsets — libBase + X = Il2CppClass* ────────────────────
+    // Fuente: frida_statics.js output ó il2cpp.h comentario "TypeInfo: 0x..."
+    const val PM_TYPE_INFO     = 0x0L  // FILL: FightingFighterManager (u otro player manager)
+    const val CAM_TYPE_INFO    = 0x0L  // FILL: BaseCameraController (u otro camera ctrl)
 
-    // dump.cs: buscar "class LocalPlayer" o "SelfFighter" o campo static en FightingFighterManager
-    const val LOCAL_PLAYER_STATIC   = 0x0L          // FILL
+    // ── Static field offsets dentro del StaticFields struct ───────────────
+    // Fuente: dump.cs bloque "// Static fields:" → valor // 0xXX
+    const val PM_STATIC_INSTANCE  = 0x0L  // FILL: m_pInstance o similar (manager singleton)
+    const val CAM_STATIC_INSTANCE = 0x0L  // FILL: camera controller singleton
 
-    // dump.cs: "class BaseCameraController" o "ThirdPersonCameraController"
-    const val CAMERA_CTRL_STATIC    = 0x0L          // FILL
+    // ── PlayerManager → player list ────────────────────────────────────────
+    // Fuente: dump.cs, campo List<FightingFighter> dentro del manager
+    const val PM_PLAYER_LIST      = 0x0L  // FILL: offset del List<> dentro del manager
+    const val LIST_ITEMS          = 0x10L // List<T>._items (Unity estándar, no cambiar)
+    const val LIST_SIZE           = 0x18L // List<T>._size
 
-    // ── Player List ──────────────────────────────────────────────────────────
-    const val PM_PLAYER_LIST        = 0x20L          // FILL: offset a List<Fighter> dentro del manager
-    const val LIST_ITEMS            = 0x10L          // List<T>._items → object[]
-    const val LIST_SIZE             = 0x18L          // List<T>._size  → int32
+    // ── Per-player ──────────────────────────────────────────────────────────
+    // Fuente: dump.cs, clase FightingFighter (o la que matcheó)
+    const val PLAYER_HP           = 0x0L  // FILL: float currentHp
+    const val PLAYER_HP_MAX       = 0x0L  // FILL: float maxHp
+    const val PLAYER_IS_ALIVE     = 0x0L  // FILL: bool isAlive / !isDead
+    const val PLAYER_IS_ENEMY     = 0x0L  // FILL: bool isEnemy (o usar PLAYER_TEAM)
+    const val PLAYER_TEAM         = 0x0L  // FILL: int teamId (alternativa a IS_ENEMY)
+    const val PLAYER_NAME_PTR     = 0x0L  // FILL: System.String* (playerName)
 
-    // ── Per-player (FightingFighter / CharacterState) ────────────────────────
-    // dump.cs: buscar la clase del fighter, sus fields con [FieldOffset(0xXX)]
-    const val PLAYER_IS_ALIVE       = 0x0L           // FILL: bool
-    const val PLAYER_IS_ENEMY       = 0x0L           // FILL: bool  (o derivar de team != local team)
-    const val PLAYER_HP             = 0x0L           // FILL: float
-    const val PLAYER_HP_MAX         = 0x0L           // FILL: float
-    const val PLAYER_NAME_PTR       = 0x0L           // FILL: System.String*
-    const val PLAYER_TRANSFORM_COMP = 0x10L          // Component.m_CachedPtr (estándar Unity)
+    // Opción A: el script guarda un Transform cachedado como campo
+    const val PLAYER_TRANSFORM    = 0x0L  // FILL: Transform component ref (campo en el script)
 
-    // ── Transform (nativo Unity) ─────────────────────────────────────────────
-    // Offset dentro del native transform object hacia la posición world (Vec3 x,y,z floats)
-    // Unity 2019.4 arm64: prueba 0x54, 0x78, 0x90 — congelar XY en CE-Android y buscar
-    const val NATIVE_TRANSFORM_POS  = 0x54L          // FILL: Vec3 world position
+    // Opción B: el script tiene Vector3 de posición directo (más raro pero posible)
+    const val PLAYER_POS_DIRECT   = 0x0L  // FILL: Vector3 worldPosition (si existe)
 
-    // ── Cámara / ángulos de apuntado ─────────────────────────────────────────
-    // dump.cs: BaseCameraController o similar, buscar fields "yaw" / "pitch" / "eulerAngles"
-    // O busca UnityEngine.Camera → m_CachedPtr → native cam → yaw/pitch
-    const val CAM_CACHED_PTR        = 0x10L          // Component.m_CachedPtr
-    const val NATIVE_CAM_VP         = 0x0L           // FILL: float[16] view-proj matrix (para W2S)
+    // ── Unity Component / Transform ─────────────────────────────────────────
+    // Constante Unity arm64: Component.m_CachedPtr = 0x10
+    const val COMPONENT_NATIVE    = 0x10L
+    // Offset del Vec3 dentro del native Transform object.
+    // Valores a probar: 0x54, 0x64, 0x78, 0x90
+    const val NATIVE_POS          = 0x54L  // FILL/verificar
 
-    // Para el aimbot: ángulos escritos en el controlador de cámara
-    // dump.cs: buscar "m_fYawAngle", "yaw", "m_horizontalAngle" en el camera controller
-    const val CAM_CTRL_CACHED_PTR   = 0x10L
-    const val CAM_CTRL_YAW          = 0x0L           // FILL: float (write aquí para aim H)
-    const val CAM_CTRL_PITCH        = 0x0L           // FILL: float (write aquí para aim V)
+    // ── Camera controller ───────────────────────────────────────────────────
+    // Fuente: dump.cs, clase BaseCameraController
+    const val CAM_YAW             = 0x0L  // FILL: float yaw (horizontal angle)
+    const val CAM_PITCH           = 0x0L  // FILL: float pitch (vertical angle)
+    // VP matrix float[16] dentro del native camera para W2S.
+    // Si es 0: el overlay calcula W2S desde rotación+posición (menos preciso).
+    const val NATIVE_CAM_VP       = 0x0L  // FILL opcional
 }
