@@ -8,23 +8,15 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId  = "com.esp.ff"
-        minSdk         = 28
-        targetSdk      = 33   // avoid Android-14 foreground-service restrictions
-        versionCode    = 1
-        versionName    = "1.0"
-
-        externalNativeBuild {
-            cmake { cppFlags("-std=c++17"); abiFilters("arm64-v8a") }
-        }
+        applicationId = "com.esp.ff"
+        minSdk        = 28
+        targetSdk     = 33
+        versionCode   = 1
+        versionName   = "1.0"
     }
 
     buildTypes {
         release { isMinifyEnabled = false; isShrinkResources = false }
-    }
-
-    externalNativeBuild {
-        cmake { path = file("src/main/cpp/CMakeLists.txt"); version = "3.22.1" }
     }
 
     compileOptions {
